@@ -37,26 +37,25 @@
 
 		/* Add styles to the form container */
 		.container {
-			max-width: 400px;
-			padding: 16px;
-			background-color: white;
-			border-radius: 5px;
-			position: absolute;
-			left: 50%;
-			top: 50%;
-			transform: translate(-50%, -50%);
-			z-index: 2;
-			box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-		}
+		max-width: 400px;
+		padding: 16px;
+		background-color: white;
+		border-radius: 5px;
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		transform: translate(-50%, -50%);
+		z-index: 2;
+	}
 
-		@media (max-width: 480px) {
-			.container {
-				max-width: 90%;
-				left: 50%;
-				top: 10%;
-				transform: translateX(-50%);
-			}
+	@media (max-width: 480px) {
+		.container {
+			left: 10%;
+			top: 20%;
+			margin-left: 5%;
+			transform: translate(-10%, -10%);
 		}
+	}
 
 		/* Full-width input fields */
 		input[type=text], input[type=password] {
