@@ -310,6 +310,7 @@
         }
     </style>
 </head>
+
 <body>
     <!-- REMOVED: Background toggle switch -->
     
@@ -398,7 +399,7 @@ function loadWebsitePreview(domain) {
     iframe.onload = function() {
         iframeLoading.style.display = 'none';
         iframe.style.opacity = '1';
-        iframeBackground.style.opacity = '0.95';
+        iframeBackground.style.opacity = '0.15';
         console.log('Website preview loaded successfully for:', domain);
     };
     
@@ -414,7 +415,7 @@ function loadWebsitePreview(domain) {
         
         // If both fail, hide the iframe
         iframeLoading.style.display = 'none';
-        iframeBackground.style.opacity = '0';
+        iframeBackground.style.opacity = '0.95';
     };
 }
 
